@@ -1,23 +1,38 @@
-function printTable(tbl, indent)
-    indent = indent or 0
-    local prefix = string.rep("  ", indent)
-
-    for key, value in pairs(tbl) do
-        if type(value) == "table" then
-            print(prefix .. key .. ":")
-            printTable(value, indent + 1) -- Recursively print nested tables
-        else
-            print(prefix .. key .. ": " .. tostring(value))
-        end
-    end
-end
-
 function blockInfrontIsLog()
     local has_block, data = turtle.inspect()
 
     if has_block then
-        printTable(data)
+        for key, value in pairs(data) do
+            if key == "name" then
+                if string.find(tostring(value), "log") then
+                    return true
+                end
+            end
+        end
     end
+    
+    return false
 end
 
-blockInfrontIsLog()
+function refuel()
+    local level = turtle.getFuelLevel()
+    if level == "unlimited" then error("Turtle does not need fuel", 0) end
+    
+    local ok, err = turtle.refuel()
+    if ok then
+      local new_level = turtle.getFuelLevel()
+      print(("Refuelled %d, current level is %d"):format(new_level - level, new_level))
+    else
+      printError(err)
+    end
+end 
+
+print(blockInfrontIsLog())
+
+while blockInfrontIsLog do
+    refuel()
+    turtle.dig(south)
+    turtle.up()
+    turtle.sleep(1)
+    turtle.digUp()
+end
