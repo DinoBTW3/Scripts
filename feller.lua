@@ -1,10 +1,10 @@
 local has_block, data = turtle.inspect()
 if has_block then
     repeat
+        turtle.refuel()
         turtle.dig(south)
         turtle.digUp()
-        has_block, data = turtle.inspect()
+        turtle.dance()
+        turtle.up(1)
     until data == false
-    turtle.refuel()
-    turtle.up(1)
 end
