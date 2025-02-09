@@ -63,20 +63,7 @@ end
 
 -- Function to make the turtle face south
 function faceSouth()
-    local currentDirection = turtle.getFacing()
-
-    -- If facing north, turn right once
-    if currentDirection == "north" then
-        turtle.turnRight()
-    -- If facing east, turn left twice
-    elseif currentDirection == "east" then
-        turtle.turnLeft()
-        turtle.turnLeft()
-    -- If facing west, turn right twice
-    elseif currentDirection == "west" then
-        turtle.turnRight()
-        turtle.turnRight()
-    end
+    turtle.turnLeft()
 end
 
 print("Starting...")
