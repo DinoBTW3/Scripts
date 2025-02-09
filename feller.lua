@@ -105,12 +105,12 @@ end
 print("Starting...")
 
 while true do
-    MOVED_STEPS = 0
+    MOVED_STEPS = 0    
 
     while true do
+        refuel()
         -- DIG PHASE: Dig upward as long as a log is in front (facing south).
-        while blockInfrontIsLog() do
-            refuel()
+        while blockInfrontIsLog() do            
             print("Log detected! Digging up...")
             turtle.digUp()
             sleep(0.5)
@@ -143,8 +143,7 @@ while true do
             turtle.turnLeft() -- Now facing south again.
 
             -- Perform the dig phase on this new side.
-            while blockInfrontIsLog() do
-                refuel()
+            while blockInfrontIsLog() do                
                 print("Log detected! Digging up...")
                 turtle.digUp()
                 sleep(0.5)
