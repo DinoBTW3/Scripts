@@ -1,10 +1,11 @@
-local has_block, data = turtle.inspect()
-
-if has_block then
-    repeat
-        turtle.refuel()
-        print(has_block)
-        print(data)
-        turtle.dig(south)
-    until data == false
+function blockInfront()
+    local has_block, data = turtle.inspect()
+    if has_block then
+        print(textutils.serialise(data))
+        return true
+    else
+        return false
+    end 
 end
+
+blockInfront()
