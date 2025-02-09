@@ -1,11 +1,15 @@
-function blockInfront()
+function blockInfrontIsLog()
     local has_block, data = turtle.inspect()
+
     if has_block then
-        print(textutils.serialise(data))
-        return true
-    else
-        return false
-    end 
+        for k, v in pairs(data) do
+            if v[1] == "minecraft:log" then
+                return true
+            else
+                return false
+            end
+        end
+    end
 end
 
-blockInfront()
+print(blockInfrontIsLog())
