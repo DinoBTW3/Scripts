@@ -28,31 +28,6 @@ function hasFuel()
 end
 
 -- Refuel if the fuel level is below the threshold.
-function refuelOld()
-    local level = turtle.getFuelLevel()
-    if level == "unlimited" then
-        print("Turtle has unlimited fuel.")
-        return
-    end
-
-    if level < MIN_FUEL_LEVEL then
-        print("Fuel level is low, refueling...")
-        if hasFuel() then
-            local ok, err = turtle.refuel(1)
-            if ok then
-                local new_level = turtle.getFuelLevel()
-                print("Refueled. Current fuel level: " .. new_level)
-            else
-                print("Error refueling: " .. err)
-            end
-        else
-            print("No coal or charcoal found in inventory!")
-        end
-    else
-        print("Fuel level is sufficient: " .. level)
-    end
-end
-
 function refuel()
     local level = turtle.getFuelLevel()
     if level == "unlimited" then
