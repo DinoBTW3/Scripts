@@ -28,7 +28,7 @@ function hasFuel()
 end
 
 -- Refuel if the fuel level is below the threshold.
-function refuel()
+function refuelOld()
     local level = turtle.getFuelLevel()
     if level == "unlimited" then
         print("Turtle has unlimited fuel.")
@@ -45,6 +45,36 @@ function refuel()
             else
                 print("Error refueling: " .. err)
             end
+        else
+            print("No coal or charcoal found in inventory!")
+        end
+    else
+        print("Fuel level is sufficient: " .. level)
+    end
+end
+
+function refuel()
+    local level = turtle.getFuelLevel()
+    if level == "unlimited" then
+        print("Turtle has unlimited fuel.")
+        return
+    end
+
+    if level < MIN_FUEL_LEVEL then
+        print("Fuel level is low, refueling...")
+        if hasFuel() then
+            for slot = 1, 16 do  -- Turtle has 16 slots
+                local item = turtle.getItemDetail(slot)  -- Get item details in the slot
+                if item and item.name == "minecraft:coal" or item.name == "minecraft:charcoal" then
+                    turtle.select(slot)  -- Select the slot with coal
+                    if turtle.refuel(1) then  -- Refuel using 1 coal item
+                        print("Refueled using coal from slot " .. slot)
+                        return true
+                    end
+                end
+            end
+            print("No coal found in inventory!")
+            
         else
             print("No coal or charcoal found in inventory!")
         end
@@ -177,6 +207,7 @@ if saplingSlot then
     end
 else
     print("No saplings found in inventory.")
+    
 end
 
 print("Finished.")
