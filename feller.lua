@@ -1,18 +1,20 @@
 local MIN_FUEL_LEVEL = 80
 
+-- Check if the block in front is a log.
 function blockInfrontIsLog()
     local has_block, data = turtle.inspect()
-
-    if has_block then
-        if data.name and string.find(data.name, "log") then
-            return true
-        end
+    if has_block and data.name and string.find(data.name, "log") then
+        return true
     end
-    
     return false
 end
 
--- Function to check if the turtle has coal or charcoal
+function blockInfrontIsAir()
+    local has_block, data = turtle.inspect()
+    return has_block
+end
+
+-- Check if the turtle has coal or charcoal.
 function hasFuel()
     for slot = 1, 16 do
         local item = turtle.getItemDetail(slot)
@@ -25,32 +27,52 @@ function hasFuel()
     return false
 end
 
+-- Refuel if the fuel level is below the threshold.
 function refuel()
     local level = turtle.getFuelLevel()
-
-    -- If fuel level is below the minimum, and the turtle has coal or charcoal, refuel
     if level == "unlimited" then
-        error("Turtle does not need fuel", 0)
-    elseif level < MIN_FUEL_LEVEL then
-        print("Fuel level is low, checking for coal or charcoal...")
+        print("Turtle has unlimited fuel.")
+        return
+    end
 
-        -- Check if the turtle has coal or charcoal
+    if level < MIN_FUEL_LEVEL then
+        print("Fuel level is low, refueling...")
         if hasFuel() then
             local ok, err = turtle.refuel(1)
             if ok then
                 local new_level = turtle.getFuelLevel()
-                print(("Refueled %d, current level is %d"):format(new_level - level, new_level))
+                print("Refueled. Current fuel level: " .. new_level)
             else
-                printError(err)
+                print("Error refueling: " .. err)
             end
         else
             print("No coal or charcoal found in inventory!")
         end
     else
-        print(("Current fuel level is %d, no need to refuel."):format(level))
+        print("Fuel level is sufficient: " .. level)
     end
 end
 
+-- Move down until the turtle detects the ground.
+function moveDownToGround()
+    while not turtle.detectDown() do
+        turtle.down()
+    end
+
+    local saplingSlot = findSapling()
+    if saplingSlot then
+        turtle.select(saplingSlot)
+        if turtle.place() then
+            print("Sapling planted.")
+        else
+            print("Failed to plant sapling.")
+        end
+    else
+        print("No saplings found in inventory.")
+    end
+end
+
+-- Find a sapling in the inventory.
 function findSapling()
     for slot = 1, 16 do
         local item = turtle.getItemDetail(slot)
@@ -61,29 +83,90 @@ function findSapling()
     return nil
 end
 
--- Function to make the turtle face south
+-- Since the turtle always starts facing south,
+-- turning right will make it face west.
+-- (Later, turning left from west returns it to south.)
+function faceRight()
+    turtle.turnRight()
+end
+
+-- Ensure the turtle faces south.
 function faceSouth()
+    -- If the turtle is not facing south, this routine should be
+    -- adjusted as needed. Here we assume that after our rightward movement,
+    -- a left turn makes it face south.
     turtle.turnLeft()
 end
 
 print("Starting...")
 
-while blockInfrontIsLog() do
-    refuel()
-    turtle.dig() -- Dig forward
-    turtle.up()
-    sleep(1) -- Sleep for 1 second
-    turtle.digUp()
+MOVED_STEPS = 0
+
+while true do
+    -- DIG PHASE: Dig upward as long as a log is in front (facing south).
+    while blockInfrontIsLog() do
+        refuel()
+        print("Log detected! Digging up...")
+        turtle.digUp()
+        sleep(0.5) 
+        turtle.dig()      -- Dig the block in front.
+        turtle.up()       -- Move up.
+        turtle.digUp()
+        sleep(0.5) 
+    end
+
+    moveDownToGround()
+
+
+    -- Now check the right side for a block (we do this *after* digging).
+    -- To check the block on its right, the turtle turns right, inspects,
+    -- then turns back to face south.
+    turtle.turnRight()  -- Now facing west.
+    local rightBlock = blockInfrontIsAir()  -- Check block in front (i.e. right side).
+    turtle.turnLeft()   -- Return to facing south.
+
+    if rightBlock then
+        -- A block is detected on the right.
+        print("Block detected on the right. Moving right 5 blocks and performing side dig...")
+        -- Turn right, move 5 blocks, then turn left so the turtle faces south again.
+        turtle.turnRight()  -- Face west.
+        for i = 1, 5 do
+            if not turtle.forward() then
+                print("Failed to move forward while moving right.")
+                break
+            end
+        end
+        turtle.turnLeft()   -- Now facing south again.
+
+        -- Perform the dig phase on this new side.
+        while blockInfrontIsLog() do
+            refuel()
+            print("Log detected! Digging up...")
+            turtle.digUp()
+            sleep(0.5) 
+            turtle.dig()      -- Dig the block in front.
+            turtle.up()       -- Move up.
+            turtle.digUp()
+            sleep(0.5) 
+        end
+        moveDownToGround()
+        
+        print("Finished side dig. Exiting code.")
+        break
+    else
+        print("No block on the right; moving right 5 blocks and continuing...")
+        turtle.turnRight()  -- Face west.
+        for i = 1, 5 do
+            if not turtle.forward() then
+                print("Failed to move forward while moving right.")
+                break
+            end
+        end
+        turtle.turnLeft()  -- Face south again.
+        MOVED_STEPS = MOVED_STEPS +1
+    end
 end
 
--- Move down until reaching the ground
-while not turtle.detectDown() do
-    turtle.down()
-end
-
-print("Finished.")
-
--- Check for saplings and place one in front
 local saplingSlot = findSapling()
 if saplingSlot then
     turtle.select(saplingSlot)
@@ -96,7 +179,10 @@ else
     print("No saplings found in inventory.")
 end
 
--- Make the turtle face south
-faceSouth()
+print("Finished.")
 
--- You can also perform additional operations if needed after this point
+turtle.turnLeft()
+for i = 1, MOVED_STEPS*5 do
+    turtle.forward()
+end
+turtle.turnRight()
