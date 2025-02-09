@@ -3,8 +3,8 @@ if has_block then
     repeat
         turtle.dig(south)
         turtle.digUp()
-        has_block, data = turtle.inspect()  -- Re-check the block after each operation
+        has_block, data = turtle.inspect()
     until data == false
+    turtle.refuel()
     turtle.up(1)
 end
---cowabunga
