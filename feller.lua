@@ -167,7 +167,6 @@ while true do
             end
             turtle.turnLeft() -- Face south again.
             MOVED_STEPS = MOVED_STEPS + 1
-            sleep(450)
         end
     end
 
@@ -190,4 +189,5 @@ while true do
         turtle.forward()
     end
     turtle.turnRight()
+    sleep(450)
 end
